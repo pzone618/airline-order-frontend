@@ -2,8 +2,7 @@ name: Deploy to EC2 (Build with version tag)
 
 on:
   push:
-    branches:
-      - AWS
+    branches: [ AWS ]
 
 jobs:
   build-and-deploy:
@@ -20,25 +19,53 @@ jobs:
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-      - name: Build and push Docker image
-        run: |
-          IMAGE_NAME=monkeydleon/airline-order-frontend
-          docker build -t $IMAGE_NAME:${IMAGE_TAG} -t $IMAGE_NAME:latest .
-          docker push $IMAGE_NAME:${IMAGE_TAG}
-          docker push $IMAGE_NAME:latest
+      # 如果前端代码在子目录 frontend/，请保留下面的 context/file；
+      # 如果就在仓库根目录，请把 context/file 改成 "." 和 "./Dockerfile"
+      - name: Build and push Docker image (frontend)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/airline-order-frontend:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/airline-order-frontend:${{ env.IMAGE_TAG }}
 
-      - name: Deploy on EC2
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      - name: Deploy Frontend on EC2 via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
 
-          IMAGE_NAME=monkeydleon/airline-order-frontend
-          IMAGE_TAG=${{ env.IMAGE_TAG }}
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-            docker pull $IMAGE_NAME:${IMAGE_TAG} &&
-            docker stop my-angular-app || true &&
-            docker rm my-angular-app || true &&
-            docker run -d --restart unless-stopped --name my-angular-app -p 80:80 $IMAGE_NAME:${IMAGE_TAG}
-          "
+            IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/airline-order-frontend:${{ env.IMAGE_TAG }}"
+            CONTAINER="airline-frontend"
+            HOST_PORT="8081"   # 后端占了 80，这里用 8081 暴露前端
+
+            # 确保 docker 在跑
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo systemctl enable --now docker
+            fi
+
+            # 登录 Docker Hub（私库需要；公库执行也无害）
+            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | sudo docker login \
+              --username "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+            # 拉镜像
+            sudo docker pull "$IMAGE"
+
+            # 停并删旧容器（若存在）
+            if sudo docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER"; then
+              sudo docker rm -f "$CONTAINER"
+            fi
+
+            # 运行前端：宿主 8081 -> 容器 80
+            sudo docker run -d --name "$CONTAINER" \
+              -p "${HOST_PORT}:80" \
+              --restart unless-stopped \
+              "$IMAGE"
+
+            # 打印状态
+            sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}"
