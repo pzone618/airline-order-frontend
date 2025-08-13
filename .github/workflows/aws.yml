@@ -24,8 +24,8 @@ jobs:
       - name: Build and push Docker image (frontend)
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: .
+          file: Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/airline-order-frontend:latest
