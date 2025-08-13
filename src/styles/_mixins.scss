@@ -1,0 +1,65 @@
+@import 'variables';
+
+@mixin login-wrapper-style {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $background-gradient;
+  font-family: $font-family;
+  padding: 16px;
+}
+
+@mixin login-card-style {
+  background: $card-bg-color;
+  padding: 48px 40px;
+  border-radius: $card-border-radius;
+  box-shadow: $card-box-shadow;
+  width: 480px;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+
+  &:focus-within {
+    border-color: lighten($primary-color, 20%);
+  }
+}
+
+@mixin form-label-style {
+  font-weight: 600;
+  color: #333;
+}
+
+@mixin form-control-style {
+  margin-bottom: $input-margin-bottom;
+  position: relative;
+}
+
+@mixin login-button-style {
+  width: 100%;
+  height: $button-height;
+  font-size: $button-font-size;
+  font-weight: $button-font-weight;
+  border-radius: 6px;
+}
+
+@mixin password-toggle-icon-style {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s;
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+@mixin remember-me-style {
+  text-align: left;
+  margin-bottom: 24px;
+}

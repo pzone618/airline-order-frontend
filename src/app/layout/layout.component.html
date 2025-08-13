@@ -1,0 +1,71 @@
+<nz-layout class="admin-layout">
+  <nz-header class="header">
+    <div class="logo" (click)="goHome()">Flight Admin</div>
+
+    <div class="header-right">
+      <a
+        nz-dropdown
+        [nzDropdownMenu]="menu"
+        nzPlacement="bottomRight"
+        style="cursor: pointer"
+      >
+        <nz-avatar nzIcon="user" [nzSize]="32"></nz-avatar>
+        <span class="username">{{ username }}</span>
+      </a>
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item (click)="logout()">登出</li>
+        </ul>
+      </nz-dropdown-menu>
+    </div>
+  </nz-header>
+
+  <nz-layout>
+    <nz-sider
+      [nzCollapsed]="collapsed"
+      nzWidth="220"
+      nzTheme="light"
+      class="sider"
+    >
+      <!-- <button
+        nz-button
+        nzType="default"
+        class="collapse-btn"
+        (click)="toggleCollapse()"
+      >
+        {{ collapsed ? "展开" : "折叠" }}
+      </button> -->
+
+      <ul nz-menu nzMode="inline">
+        <li nz-menu-item [routerLink]="['/dashboard']" nzKey="dashboard">
+          仪表盘
+        </li>
+        <li nz-submenu nzTitle="订单管理">
+          <ul>
+            <li nz-menu-item [routerLink]="['/orders']" nzKey="orders">
+              订单列表
+            </li>
+          </ul>
+        </li>
+        <li nz-submenu nzTitle="用户管理">
+          <ul>
+            <li nz-menu-item [routerLink]="['/users']" nzKey="users">
+              用户列表
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nz-sider>
+
+    <nz-layout class="main-layout">
+      <nz-breadcrumb style="margin: 16px 0; padding-left: 16px">
+        <nz-breadcrumb-item>后台</nz-breadcrumb-item>
+        <nz-breadcrumb-item routerLinkActive="active">管理</nz-breadcrumb-item>
+      </nz-breadcrumb>
+
+      <nz-content class="content">
+        <router-outlet></router-outlet>
+      </nz-content>
+    </nz-layout>
+  </nz-layout>
+</nz-layout>

@@ -1,26 +1,46 @@
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f2f5;
+@import 'variables';
+@import 'mixins';
+
+.login-wrapper {
+  @include login-wrapper-style;
 }
 
-.login-form {
-  max-width: 300px;
-  width: 100%;
-  padding: 30px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+.login-card {
+  @include login-card-style;
 }
 
-.login-title {
-  text-align: center;
-  margin-bottom: 24px;
-  color: #333;
+.login-logo {
+  margin-bottom: 32px;
+
+  img {
+    width: 80px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-weight: 700;
+    font-size: 24px;
+    color: $primary-color;
+    user-select: none;
+  }
 }
 
-.login-form-button {
-  width: 100%;
+nz-form-label {
+  @include form-label-style;
+}
+
+nz-form-control {
+  @include form-control-style;
+}
+
+.login-submit-btn {
+  @include login-button-style;
+}
+
+.password-toggle-icon {
+  @include password-toggle-icon-style;
+}
+
+.remember-me {
+  @include remember-me-style;
 }

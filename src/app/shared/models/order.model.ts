@@ -4,14 +4,14 @@ export interface Order {
   id: number;
   orderNumber: string;
   status:
-    | 'PENDING_PAYMENT'
+    | 'CREATED'
+    | 'CANCELLED'
     | 'PAID'
-    | 'TICKETING_IN_PROGRESS'
-    | 'TICKETING_FAILED'
+    | 'PENDING_PAYMENT'
     | 'TICKETED'
-    | 'CANCELLED';
+    | 'TICKETING_FAILED'
+    | 'TICKETING_IN_PROGRESS';
   amount: number;
-  creationDate: Date;
-  user: User;
-  flightInfo?: any; // 模拟的航班信息
+  creationDate: string;
+  userId: number | null;
 }

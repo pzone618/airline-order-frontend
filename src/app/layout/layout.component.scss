@@ -1,0 +1,43 @@
+.admin-layout {
+    height: 100vh;
+    .header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 16px;
+      background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+      color: #fff;
+      .logo {
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .header-right {
+        display:flex;
+        align-items:center;
+        .username {
+          color:#fff;
+          margin-left:8px;
+        }
+      }
+    }
+  
+    .sider {
+      padding-top: 12px;
+      .collapse-btn {
+        width: 100%;
+        margin-bottom: 12px;
+      }
+    }
+  
+    .main-layout {
+      padding: 0 24px 24px;
+      .content {
+        background: #fff;
+        padding: 24px;
+        min-height: calc(100vh - 112px);
+        border-radius: 6px;
+      }
+    }
+  }
+  

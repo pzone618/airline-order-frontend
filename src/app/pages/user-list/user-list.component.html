@@ -1,0 +1,29 @@
+<nz-table
+  #userTable
+  [nzData]="users"
+  [nzLoading]="loading"
+  [nzFrontPagination]="true"
+  [nzPageSize]="10"
+  [nzScroll]="{ x: '600px' }"
+>
+  <thead>
+    <tr>
+      <th>用户ID</th>
+      <th>用户名</th>
+      <th>角色</th>
+      <!-- <th>操作</th> -->
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let user of userTable.data">
+      <td>{{ user.id }}</td>
+      <td>{{ user.username }}</td>
+      <td>{{ user.role }}</td>
+      <!-- <td>
+        <button nz-button nzType="link" (click)="viewUser(user.id)">
+          查看
+        </button>
+      </td> -->
+    </tr>
+  </tbody>
+</nz-table>
