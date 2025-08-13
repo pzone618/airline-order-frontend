@@ -2,7 +2,8 @@ name: Deploy to EC2 (Build with version tag)
 
 on:
   push:
-    branches: AWS
+    branches:
+      - AWS
 
 jobs:
   build-and-deploy:
