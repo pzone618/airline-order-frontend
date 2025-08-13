@@ -1,0 +1,44 @@
+name: Deploy to EC2 (Build with version tag)
+
+on:
+  push:
+    branches:
+      - AWS
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set IMAGE_TAG to Git short SHA
+        id: vars
+        run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_NAME=monkeydleon/airline-order-frontend
+          docker build -t $IMAGE_NAME:${IMAGE_TAG} -t $IMAGE_NAME:latest .
+          docker push $IMAGE_NAME:${IMAGE_TAG}
+          docker push $IMAGE_NAME:latest
+
+      - name: Deploy on EC2
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+          IMAGE_NAME=monkeydleon/airline-order-frontend
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            docker pull $IMAGE_NAME:${IMAGE_TAG} &&
+            docker stop my-angular-app || true &&
+            docker rm my-angular-app || true &&
+            docker run -d --restart unless-stopped --name my-angular-app -p 80:80 $IMAGE_NAME:${IMAGE_TAG}
+          "
