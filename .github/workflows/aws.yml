@@ -42,30 +42,47 @@ jobs:
 
             IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/airline-order-frontend:${{ env.IMAGE_TAG }}"
             CONTAINER="airline-frontend"
-            HOST_PORT="8081"   # 后端占了 80，这里用 8081 暴露前端
+            HOST_PORT="8081"
 
-            # 确保 docker 在跑
-            if command -v systemctl >/dev/null 2>&1; then
-              sudo systemctl enable --now docker
+            echo "👀 Checking Docker daemon..."
+            # 如果 docker info 失败，再尝试多种启动方式，但都不让脚本报错
+            if ! sudo docker info >/dev/null 2>&1; then
+              # systemd（有则试，没有就忽略）
+              if command -v systemctl >/dev/null 2>&1; then
+                sudo systemctl start docker || true
+                sudo systemctl enable docker || true
+              fi
+              # sysvinit / service
+              sudo service docker start 2>/dev/null || true
+              # snap 方式安装的 docker
+              sudo snap start docker 2>/dev/null || true
             fi
 
-            # 登录 Docker Hub（私库需要；公库执行也无害）
+            # 仍然不行就明确失败
+            if ! sudo docker info >/dev/null 2>&1; then
+              echo "❌ Docker daemon is not running. Please ensure Docker is installed and the daemon is started."
+              exit 1
+            fi
+            echo "✅ Docker is ready."
+
+            echo "🔐 Docker Hub login..."
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | sudo docker login \
               --username "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-            # 拉镜像
+            echo "📦 Pulling image: $IMAGE"
             sudo docker pull "$IMAGE"
 
-            # 停并删旧容器（若存在）
+            echo "🧹 Removing old container (if any)..."
             if sudo docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER"; then
               sudo docker rm -f "$CONTAINER"
             fi
 
-            # 运行前端：宿主 8081 -> 容器 80
+            echo "🚀 Starting frontend on :${HOST_PORT} -> container :80"
             sudo docker run -d --name "$CONTAINER" \
               -p "${HOST_PORT}:80" \
               --restart unless-stopped \
               "$IMAGE"
 
-            # 打印状态
+            echo "📊 Containers:"
             sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}"
+
