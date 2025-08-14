@@ -1,26 +1,47 @@
-#  Stage 1: Build frontend
-FROM node:22 AS frontend-builder
+# ---------- Stage 1: Build ----------
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# (可选) 如果你用 pnpm，取消下一行注释
-# RUN npm install -g pnpm
-
-#  仅复制依赖清单以利用缓存
+# Install deps with cache-friendly layering
 COPY package*.json ./
+RUN npm ci
 
-# 安装依赖
-RUN npm install
-
-# 复制项目源码并构建
+# Copy source and build
 COPY . .
 RUN npm run build && \
-    echo "==== DIST TREE ====" && (ls -alh dist || true) && \
-    (find dist -maxdepth 3 -type d -print || true)
+    echo '==== DIST TREE (top 200 entries) ====' && \
+    (find dist -maxdepth 3 -type f -print | sed -n '1,200p' || true)
 
-# Stage 2: Serve with nginx
-FROM nginx:alpine
-# 关键修复：大多数 Vite/React/普通 Angular 构建产物直接在 dist 下，没有 browser 子目录
-COPY --from=frontend-builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Normalize artifacts into /app/dist_final regardless of framework layout
+# Handles:
+#   - Vite/React:            dist/index.html
+#   - Angular default:       dist/<project>/index.html
+#   - Angular SSR (browser): dist/<project>/browser/index.html
+ARG COMMIT_SHA="dev"
+RUN set -eux; \
+    mkdir -p /app/dist_final; \
+    if [ -f dist/index.html ]; then \
+        cp -a dist/* /app/dist_final/; \
+    elif [ -f dist/airline-order-frontend/index.html ]; then \
+        cp -a dist/airline-order-frontend/* /app/dist_final/; \
+    elif [ -f dist/airline-order-frontend/browser/index.html ]; then \
+        cp -a dist/airline-order-frontend/browser/* /app/dist_final/; \
+    else \
+        echo 'Build artifacts not found in known locations.'; \
+        echo 'Dist tree (deep):'; \
+        find dist -maxdepth 5 -print; \
+        exit 1; \
+    fi; \
+    printf '%s %s\n' \"$COMMIT_SHA\" \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\" > /app/dist_final/version.txt; \
+    echo '==== DIST_FINAL TREE ===='; \
+    find /app/dist_final -maxdepth 2 -type f -print
+
+# ---------- Stage 2: Nginx serve ----------
+FROM nginx:1.29-alpine
+
+# Copy normalized static assets to nginx root (index.html at root)
+COPY --from=build /app/dist_final/ /usr/share/nginx/html/
+
+# NOTE: default.conf is mounted via docker-compose; we don't overwrite it here.
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
