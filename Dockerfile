@@ -25,9 +25,6 @@ RUN apk add --no-cache nginx
 # 设置工作目录
 WORKDIR /app
 
-# 复制后端构建产物
-COPY --from=backend-build /app/backend/target/*.jar app.jar
-
 # 复制前端构建产物到Nginx服务目录
 COPY --from=frontend-build /app/frontend/dist/airline-order-frontend/browser /usr/share/nginx/html
 
