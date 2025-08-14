@@ -5,7 +5,7 @@ WORKDIR /app
 # (可选) 如果你用 pnpm，取消下一行注释
 # RUN npm install -g pnpm
 
-# 仅复制依赖清单以利用缓存
+#  仅复制依赖清单以利用缓存
 COPY package*.json ./
 
 # 安装依赖
