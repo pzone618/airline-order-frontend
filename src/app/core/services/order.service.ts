@@ -1,16 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators'; // 1. 导入 map 操作符
 import { Order } from '../../shared/models/order.model';
-
-// 定义一个接口来描述后端返回的完整包装对象结构
-interface ApiResponse {
-  success: boolean;
-  code: string;
-  message: string;
-  data: Order[]; // data 属性才是我们需要的订单数组
-}
 
 @Injectable({
   providedIn: 'root',
@@ -21,9 +12,7 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   getOrders(): Observable<Order[]> {
-    return this.http.get<ApiResponse>(this.apiUrl).pipe(
-      map(response => response.data)
-    );
+    return this.http.get<Order[]>(this.apiUrl);
   }
 
   getOrderById(id: string): Observable<Order> {

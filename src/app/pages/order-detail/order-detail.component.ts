@@ -13,8 +13,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 
-import { tap, map } from 'rxjs/operators';
-
 @Component({
   selector: 'app-order-detail',
   standalone: true,
@@ -58,13 +56,7 @@ export class OrderDetailComponent implements OnInit {
         this.orderId = id;
         // 每当 refresh$ 发出新值时，重新获取订单数据
         return this.refresh$.pipe(
-          switchMap(() => this.orderService.getOrderById(this.orderId).pipe(
-            map((response: any) => {
-              console.log('API 返回的原始响应:', response); // 加上日志方便调试
-              return response.data; // 只返回我们需要的订单对象
-          })
-          )
-          )
+          switchMap(() => this.orderService.getOrderById(this.orderId))
         );
       })
     );

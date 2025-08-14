@@ -36,7 +36,7 @@ export class OrderListComponent implements OnInit {
   ngOnInit(): void {
     this.orders$ = this.orderService.getOrders();
   }
-
+  
   getStatusColor(status: Order['status']): string {
     switch (status) {
       case 'PAID': return 'green';

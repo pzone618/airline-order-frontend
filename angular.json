@@ -7,9 +7,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss",
-          "standalone": true,
-          "skipTests": true
+          "style": "scss"
         }
       },
       "root": "",
@@ -19,9 +17,13 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "outputPath": "dist/frontend",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -33,10 +35,10 @@
                 "output": "/assets/"
               }
             ],
-            "styles": ["src/theme.less", "src/styles.scss"],
-            "stylePreprocessorOptions": {
-              "includePaths": ["src/styles"]
-            }
+            "styles": [
+              "src/theme.less",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
@@ -44,12 +46,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "2MB",
-                  "maximumError": "5MB"
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "2MB"
                 }
               ],
               "outputHashing": "all"
@@ -91,7 +93,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "src/styles.scss"
+            ]
           }
         }
       }

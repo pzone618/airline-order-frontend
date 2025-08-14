@@ -5,7 +5,7 @@
     </nz-page-header-extra>
   </nz-page-header>
 
-  <!-- <ng-container *ngIf="order$ | async as order; else loading"> -->
+  <ng-container *ngIf="order$ | async as order; else loading">
 
   <!-- 添加一个操作区域 -->
   <div class="actions" style="margin-bottom: 16px;">
@@ -31,23 +31,21 @@
 
 
   <nz-descriptions nzTitle="订单详情" nzBordered>
-    <nz-descriptions-item nzTitle="订单ID">{{ order.id }}</nz-descriptions-item>
-    <nz-descriptions-item nzTitle="订单号">{{ order.orderNumber }}</nz-descriptions-item>
     <nz-descriptions-item nzTitle="Status">
       <nz-tag [nzColor]="getStatusColor(order.status)">{{ order.status | titlecase }}</nz-tag>
+         <nz-descriptions-item nzTitle="订单ID">{{ order.id }}</nz-descriptions-item>
+    <nz-descriptions-item nzTitle="订单号">{{ order.orderNumber }}</nz-descriptions-item>
       <!-- 为异步状态添加一个加载指示器 -->
       <nz-spin *ngIf="order.status === 'TICKETING_IN_PROGRESS'" nzSimple [nzSize]="'small'"></nz-spin>
     </nz-descriptions-item>
-    <nz-descriptions-item nzTitle="订单金额">{{ order.amount | currency:'CNY' }}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="订单金额">{{ order.amount | currency:'CNY' }}</nz-descriptions-item>
     <nz-descriptions-item nzTitle="创建时间">{{ order.creationDate | date:'full' }}</nz-descriptions-item>
-    <nz-descriptions-item nzTitle="下单用户" *ngIf="order.user">
-      {{ order.user.username }} (ID: {{ order.user.id }})
-    </nz-descriptions-item>
+    <nz-descriptions-item nzTitle="下单用户">{{ order.user.username }} (ID: {{ order.user.id }})</nz-descriptions-item>
     <nz-descriptions-item nzTitle="模拟航班信息" nzSpan="2" *ngIf="order.flightInfo">
       <pre>{{ order.flightInfo | json }}</pre>
     </nz-descriptions-item>
   </nz-descriptions>
-  <!-- </ng-container> -->
+</ng-container>
 
 </div>
 
