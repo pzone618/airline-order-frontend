@@ -1,4 +1,4 @@
-# Stage 1: Build frontend
+#  Stage 1: Build frontend
 FROM node:22 AS frontend-builder
 WORKDIR /app
 
