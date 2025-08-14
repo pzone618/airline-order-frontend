@@ -1,47 +1,47 @@
-# ---------- Stage 1: Build ----------
-FROM node:20-alpine AS build
+# 多阶段构建 - 前端构建阶段
+FROM node:22-alpine AS frontend-build
+
+# 设置工作目录
+WORKDIR /app/frontend
+
+# 复制package.json和package-lock.json
+COPY frontend/package*.json ./
+
+# 安装依赖
+RUN npm install
+
+# 复制前端源代码
+COPY frontend/ .
+
+# 构建前端应用
+RUN npm run build
+
+# 最终阶段 - 运行时镜像
+FROM eclipse-temurin:17-jre-alpine
+
+# 安装Nginx
+RUN apk add --no-cache nginx
+
+# 设置工作目录
 WORKDIR /app
 
-# Install deps with cache-friendly layering
-COPY package*.json ./
-RUN npm ci
+# 复制后端构建产物
+COPY --from=backend-build /app/backend/target/*.jar app.jar
 
-# Copy source and build
-COPY . .
-RUN npm run build && \
-    echo '==== DIST TREE (top 200 entries) ====' && \
-    (find dist -maxdepth 3 -type f -print | sed -n '1,200p' || true)
+# 复制前端构建产物到Nginx服务目录
+COPY --from=frontend-build /app/frontend/dist/airline-order-frontend/browser /usr/share/nginx/html
 
-# Normalize artifacts into /app/dist_final regardless of framework layout
-# Handles:
-#   - Vite/React:            dist/index.html
-#   - Angular default:       dist/<project>/index.html
-#   - Angular SSR (browser): dist/<project>/browser/index.html
-ARG COMMIT_SHA="dev"
-RUN set -eux; \
-    mkdir -p /app/dist_final; \
-    if [ -f dist/index.html ]; then \
-        cp -a dist/* /app/dist_final/; \
-    elif [ -f dist/airline-order-frontend/index.html ]; then \
-        cp -a dist/airline-order-frontend/* /app/dist_final/; \
-    elif [ -f dist/airline-order-frontend/browser/index.html ]; then \
-        cp -a dist/airline-order-frontend/browser/* /app/dist_final/; \
-    else \
-        echo 'Build artifacts not found in known locations.'; \
-        echo 'Dist tree (deep):'; \
-        find dist -maxdepth 5 -print; \
-        exit 1; \
-    fi; \
-    printf '%s %s\n' \"$COMMIT_SHA\" \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\" > /app/dist_final/version.txt; \
-    echo '==== DIST_FINAL TREE ===='; \
-    find /app/dist_final -maxdepth 2 -type f -print
+# 复制Nginx配置文件
+COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# ---------- Stage 2: Nginx serve ----------
-FROM nginx:1.29-alpine
+# 创建启动脚本
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'nginx' >> /app/start.sh && \
+    echo 'java -jar /app/app.jar' >> /app/start.sh && \
+    chmod +x /app/start.sh
 
-# Copy normalized static assets to nginx root (index.html at root)
-COPY --from=build /app/dist_final/ /usr/share/nginx/html/
+# 暴露端口
+EXPOSE 80 8080
 
-# NOTE: default.conf is mounted via docker-compose; we don't overwrite it here.
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# 设置启动命令
+CMD ["sh", "/app/start.sh"]
