@@ -1,20 +1,48 @@
 <div class="login-container">
-  <form nz-form [formGroup]="loginForm" class="login-form" (ngSubmit)="submitForm()">
+  <form
+    nz-form
+    [formGroup]="loginForm"
+    class="login-form"
+    (ngSubmit)="submitForm()"
+  >
     <h2 class="login-title">航空订单系统登录</h2>
+    <h2 class="login-title">Version3.0</h2>
     <nz-form-item>
       <nz-form-control nzErrorTip="请输入用户名!">
         <nz-input-group nzPrefixIcon="user">
-          <input type="text" nz-input formControlName="username" placeholder="用户名 (admin)" />
+          <input
+            type="text"
+            nz-input
+            formControlName="username"
+            placeholder="用户名 (admin)"
+          />
         </nz-input-group>
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
       <nz-form-control nzErrorTip="请输入密码!">
         <nz-input-group nzPrefixIcon="lock">
-          <input type="password" nz-input formControlName="password" placeholder="密码 (password)" />
+          <input
+            type="password"
+            nz-input
+            formControlName="password"
+            placeholder="密码 (password)"
+          />
         </nz-input-group>
       </nz-form-control>
     </nz-form-item>
-    <button nz-button class="login-form-button" [nzType]="'primary'" [nzLoading]="isLoading">登 录</button>
+    <button
+      nz-button
+      class="login-form-button"
+      [nzType]="'primary'"
+      [nzLoading]="isLoading"
+    >
+      登 录</button
+    ><br />
+    <!-- 注册链接 -->
+    <div class="register-link">
+      还没有账号?
+      <a routerLink="/register" class="link-primary">立即注册</a>
+    </div>
   </form>
 </div>

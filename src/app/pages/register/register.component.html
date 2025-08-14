@@ -1,0 +1,97 @@
+<div class="register-container">
+  <form
+    nz-form
+    [formGroup]="registerForm"
+    (ngSubmit)="submitForm()"
+    class="register-form"
+  >
+    <h2 class="login-title">用户注册</h2>
+    <nz-form-item>
+      <nz-form-label nzRequired>用户名</nz-form-label>
+      <nz-form-control nzErrorTip="usernameErrorTpl">
+        <input nz-input formControlName="username" placeholder="请输入用户名" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- 请选择角色 -->
+    <nz-form-item>
+      <nz-form-label nzRequired>角 色</nz-form-label>
+      <nz-form-control nzErrorTip="roleErrorTpl">
+        <nz-select
+          formControlName="role"
+          nzPlaceHolder="请选择角色"
+          nzAllowClear
+        >
+          <nz-option nzValue="admin" nzLabel="管理员"></nz-option>
+          <nz-option nzValue="editor" nzLabel="编辑"></nz-option>
+          <nz-option nzValue="viewer" nzLabel="查看者"></nz-option>
+          <nz-option nzValue="user" nzLabel="普通用户"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>密 码</nz-form-label>
+      <nz-form-control nzErrorTip="passwordErrorTpl">
+        <nz-input-group [nzSuffix]="passwordSuffix">
+          <input
+            type="{{ passwordVisible ? 'text' : 'password' }}"
+            nz-input
+            formControlName="password"
+            placeholder="请输入密码"
+          />
+        </nz-input-group>
+        <ng-template #passwordSuffix>
+          <span
+            nz-icon
+            [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+            (click)="passwordVisible = !passwordVisible"
+          ></span>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>确认密码</nz-form-label>
+      <nz-form-control nzErrorTip="confirmPasswordErrorTpl">
+        <nz-input-group [nzSuffix]="confirmPasswordSuffix">
+          <input
+            type="{{ passwordConfirmVisible ? 'text' : 'password' }}"
+            nz-input
+            formControlName="confirmPassword"
+            placeholder="请输入确认密码"
+          />
+        </nz-input-group>
+        <ng-template #confirmPasswordSuffix>
+          <span
+            nz-icon
+            [nzType]="passwordConfirmVisible ? 'eye-invisible' : 'eye'"
+            (click)="passwordConfirmVisible = !passwordConfirmVisible"
+          ></span>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control [nzOffset]="6">
+        <button
+          nz-button
+          class="login-form-button"
+          [nzType]="'primary'"
+          [nzLoading]="loading"
+          type="submit"
+        >
+          注册
+        </button>
+        <button
+          nz-button
+          type="button"
+          style="margin-left: 8px"
+          (click)="registerForm.reset()"
+        >
+          重置
+        </button>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</div>

@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms'; // 引入 ReactiveFormsModule
-import { Router } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms'; // 引入 ReactiveFormsModule
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { finalize } from 'rxjs';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -15,7 +20,9 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 @Component({
   selector: 'app-login',
   standalone: true, // 关键！
-  imports: [ // 关键！把所有用到的模块都在这里导入
+  imports: [
+    // 关键！把所有用到的模块都在这里导入
+    RouterModule,
     CommonModule,
     ReactiveFormsModule,
     NzFormModule,
@@ -24,7 +31,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
     NzIconModule,
   ],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
   // ... (构造函数和方法保持不变) ...
@@ -38,28 +45,29 @@ export class LoginComponent {
     private message: NzMessageService
   ) {
     this.loginForm = this.fb.group({
-      username: ['admin', [Validators.required]],
-      password: ['password', [Validators.required]],
+      username: ['test', [Validators.required]],
+      password: ['123456', [Validators.required]],
     });
   }
 
   submitForm(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      this.authService.login(this.loginForm.value).pipe(
-        finalize(() => this.isLoading = false)
-      ).subscribe({
-        next: () => {
-          this.message.success('登录成功!');
-          this.router.navigate(['/orders']);
-        },
-        error: (err) => {
-          this.message.error('登录失败，请检查用户名或密码！');
-          console.error(err);
-        }
-      });
+      this.authService
+        .login(this.loginForm.value)
+        .pipe(finalize(() => (this.isLoading = false)))
+        .subscribe({
+          next: () => {
+            this.message.success('登录成功!');
+            this.router.navigate(['/orders']);
+          },
+          error: (err) => {
+            this.message.error('登录失败，请检查用户名或密码！');
+            console.error(err);
+          },
+        });
     } else {
-      Object.values(this.loginForm.controls).forEach(control => {
+      Object.values(this.loginForm.controls).forEach((control) => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });

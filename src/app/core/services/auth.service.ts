@@ -1,24 +1,55 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiResponse, TokenData } from '../../shared/models/api-response.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  // 注意：在实际部署时，这里应该是完整的后端API地址
-  // 在本地开发时，可以通过proxy.conf.json配置代理来避免跨域
   private readonly TOKEN_KEY = 'auth_token';
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) {}
 
-  login(credentials: { username: string; password: string }): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(`/api/auth/login`, credentials).pipe(
-      tap(response => {
-        localStorage.setItem(this.TOKEN_KEY, response.token);
-      })
-    );
+  login(credentials: {
+    username: string;
+    password: string;
+  }): Observable<string> {
+    // return this.http.post<{ token: string }>(`/api/auth/login`, credentials).pipe(
+    return this.http
+      .post<ApiResponse<TokenData>>(`/api/auth/login`, credentials)
+      .pipe(
+        map((response) => {
+          // 检查响应状态
+          if (!response.data?.token) {
+            throw new Error(response.message || '登录失败');
+          }
+          // 存储 token 到本地存储
+          localStorage.setItem(this.TOKEN_KEY, response.data.token);
+          // 返回token字符串
+          return response.data.token;
+          // localStorage.setItem(this.TOKEN_KEY, response.token);
+        })
+      );
+  }
+
+  register(credentials: {
+    username: string;
+    password: string;
+    role: string;
+  }): Observable<void> {
+    return this.http
+      .post<ApiResponse<any>>(`/api/auth/register`, credentials)
+      .pipe(
+        map((response) => {
+          // 检查响应状态
+          if (response.code !== 200) {
+            throw new Error(response.message || '注册失败');
+          }
+        })
+      );
   }
 
   logout(): void {
