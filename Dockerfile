@@ -1,20 +1,26 @@
+# Stage 1: Build frontend
 FROM node:22 AS frontend-builder
 WORKDIR /app
 
-# (关键修复) 先安装 pnpm 工具
+# (可选) 如果你用 pnpm，取消下一行注释
 # RUN npm install -g pnpm
 
-# 复制依赖描述文件以利用缓存
+# 仅复制依赖清单以利用缓存
 COPY package*.json ./
 
-RUN npm install 
-# 复制所有剩余源代码
-COPY . .
-RUN npm run build
+# 安装依赖
+RUN npm install
 
-# 阶段2：用 Nginx 提供静态文件
+# 复制项目源码并构建
+COPY . .
+RUN npm run build && \
+    echo "==== DIST TREE ====" && (ls -alh dist || true) && \
+    (find dist -maxdepth 3 -type d -print || true)
+
+# Stage 2: Serve with nginx
 FROM nginx:alpine
-COPY --from=frontend-builder /app/dist/airline-order-frontend/browser /usr/share/nginx/html
+# 关键修复：大多数 Vite/React/普通 Angular 构建产物直接在 dist 下，没有 browser 子目录
+COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
