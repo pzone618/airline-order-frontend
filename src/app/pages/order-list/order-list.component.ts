@@ -1,54 +1,53 @@
 import { Component, OnInit } from '@angular/core';
-import { OrderService } from '../../services/order.service';
-import { Router } from '@angular/router';
-import { Order } from '../../shared/models';
-import { SharedImports } from '../../shared/shared-imports';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { Observable } from 'rxjs';
+import { Order } from '../../shared/models/order.model';
+import { OrderService } from '../../core/services/order.service';
+import { AuthService } from '../../core/services/auth.service';
+
+// 引入需要的模块和管道
+import { CommonModule } from '@angular/common'; // NgFor, AsyncPipe, TitleCasePipe, CurrencyPipe, DatePipe都在这里
+import { RouterModule } from '@angular/router'; // 引入 RouterModule 以使用 routerLink
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @Component({
   selector: 'app-order-list',
-  standalone: true,
-  imports: [...SharedImports],
+  standalone: true, // 关键！
+  imports: [ // 关键！
+    CommonModule,
+    RouterModule,
+    NzTableModule,
+    NzTagModule,
+    NzButtonModule
+  ],
   templateUrl: './order-list.component.html',
-  styleUrls: ['./order-list.component.scss'],
+  styleUrls: ['./order-list.component.scss']
 })
 export class OrderListComponent implements OnInit {
-  orders: Order[] = [];
-  loading = false;
+  // ... (属性和方法保持不变) ...
+  orders$!: Observable<Order[]>;
 
   constructor(
     private orderService: OrderService,
-    private message: NzMessageService,
-    private router: Router
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.loadOrders();
+    this.orders$ = this.orderService.getOrders();
   }
 
-  loadOrders(): void {
-    this.loading = true;
-    this.orderService.getAllOrders().subscribe({
-      next: (res) => {
-        this.loading = false;
-        if (res.status === 200) {
-          this.orders = res.data;
-        } else {
-          this.message.error(res.message || '加载订单失败');
-        }
-      },
-      error: () => {
-        this.loading = false;
-        this.message.error('加载订单失败，请稍后重试');
-      },
-    });
+  getStatusColor(status: Order['status']): string {
+    switch (status) {
+      case 'PAID': return 'green';
+      case 'TICKETED': return 'blue';
+      case 'CANCELLED': return 'red';
+      case 'PENDING_PAYMENT': return 'orange';
+      default: return 'default';
+    }
   }
 
-  viewOrder(id: number): void {
-    this.router.navigate(['/orders', id]);
-  }
-
-  editOrder(id: number): void {
-    this.message.info(`编辑订单，ID: ${id}，功能待实现`);
+  logout() {
+    this.authService.logout();
   }
 }
