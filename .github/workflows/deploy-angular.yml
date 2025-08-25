@@ -44,4 +44,4 @@ jobs:
           target: "frontend"
           strip_components: 3 # <-- 最终确认的层数
           
-          overwrite: true```
+          overwrite: true
