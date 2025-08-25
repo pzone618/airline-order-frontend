@@ -37,8 +37,8 @@ jobs:
         with:
           # SSH 连接凭证 (和之前一样)
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.EC2_HOST }}
-          SSH_USERNAME: ${{ secrets.EC2_USERNAME }}
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ${{ secrets.EC2_USERNAME }}
           
           # 源文件目录
           # 注意：SOURCE 路径末尾的 / 很重要，它表示复制目录里的内容，而不是目录本身
