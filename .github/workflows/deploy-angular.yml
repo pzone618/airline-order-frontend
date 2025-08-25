@@ -32,16 +32,20 @@ jobs:
         run: npm run build
 
       # 步骤5: 上传到 EC2 服务器
-      - name: Deploy to EC2 via SCP
-        uses: appleboy/scp-action@master
+      - name: Deploy to EC2 via rsync
+        uses: easingthemes/ssh-deploy@main
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # SSH 连接凭证 (和之前一样)
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.EC2_HOST }}
+          SSH_USERNAME: ${{ secrets.EC2_USERNAME }}
           
-          # 根据你的 angular.json 确认的最终参数
-          source: "./dist/airline-order-frontend/browser/*" # <-- 最终确认的路径
-          target: "/home/ubuntu/frontend"
-          strip_components: 3 # <-- 最终确认的层数
+          # 源文件目录
+          # 注意：SOURCE 路径末尾的 / 很重要，它表示复制目录里的内容，而不是目录本身
+          SOURCE: "dist/airline-order-frontend/browser/"
           
-          overwrite: true
+          # 目标服务器目录
+          TARGET: "/home/ubuntu/frontend/"
+          
+          # 清理目标目录中多余的文件
+          ARGS: "-rltgoDvz --delete"
