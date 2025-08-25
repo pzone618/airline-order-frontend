@@ -41,7 +41,7 @@ jobs:
           
           # 根据你的 angular.json 确认的最终参数
           source: "./dist/airline-order-frontend/browser/*" # <-- 最终确认的路径
-          target: "frontend"
+          target: "/home/ubuntu/frontend"
           strip_components: 3 # <-- 最终确认的层数
           
           overwrite: true
