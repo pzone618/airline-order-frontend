@@ -29,7 +29,7 @@ jobs:
 
       # 步骤4: 构建 Angular 项目
       - name: Build project for production
-        run: npm run build --configuration production
+        run: npm run build
 
       # 步骤5: 上传到 EC2 服务器
       - name: Deploy to EC2 via SCP
