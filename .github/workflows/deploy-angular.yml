@@ -1,0 +1,47 @@
+# 工作流名称
+name: Java CI/CD with Docker
+
+# 触发条件：当代码被推送到main分支时触发
+on:
+  push:
+    branches: [ "feature/airline_tyf" ]
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 步骤2: 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22' # 或者你需要的更高版本
+          cache: 'npm'
+
+      # 步骤3: 安装依赖
+      - name: Install dependencies
+        run: npm install
+
+      # 步骤4: 构建 Angular 项目
+      - name: Build project for production
+        run: ng build --configuration production
+
+      # 步骤5: 上传到 EC2 服务器
+      - name: Deploy to EC2 via SCP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+          # 根据你的 angular.json 确认的最终参数
+          source: "./dist/airline-order-frontend/browser/*" # <-- 最终确认的路径
+          target: "frontend"
+          strip_components: 3 # <-- 最终确认的层数
+          
+          overwrite: true```
