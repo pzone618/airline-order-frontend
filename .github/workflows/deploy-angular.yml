@@ -1,7 +1,7 @@
 # 工作流名称
 name: Java CI/CD with Docker
 
-# 触发条件：当代码被推送到main分支时触发
+# 触发条件： 当代码被推送到main分支时触发
 on:
   push:
     branches: [ "feature/airline_tyf" ]
