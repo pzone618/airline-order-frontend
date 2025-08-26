@@ -1,0 +1,51 @@
+# 工作流名称
+name: Java CI/CD with Docker
+
+# 触发条件： 当代码被推送到main分支时触发
+on:
+  push:
+    branches: [ "feature/airline_tyf" ]
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 步骤2: 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22' # 或者你需要的更高版本
+          cache: 'npm'
+
+      # 步骤3: 安装依赖
+      - name: Install dependencies
+        run: npm install
+
+      # 步骤4: 构建 Angular 项目
+      - name: Build project for production
+        run: npm run build
+
+      # 步骤5: 上传到 EC2 服务器
+      - name: Deploy to EC2 via rsync
+        uses: easingthemes/ssh-deploy@main
+        with:
+          # SSH 连接凭证 (和之前一样)
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ${{ secrets.EC2_USERNAME }}
+          
+          # 源文件目录
+          # 注意：SOURCE 路径末尾的 / 很重要，它表示复制目录里的内容，而不是目录本身
+          SOURCE: "dist/airline-order-frontend/browser/"
+          
+          # 目标服务器目录
+          TARGET: "/home/ubuntu/frontend/"
+          
+          # 清理目标目录中多余的文件
+          ARGS: "-rltgoDvz --delete"
